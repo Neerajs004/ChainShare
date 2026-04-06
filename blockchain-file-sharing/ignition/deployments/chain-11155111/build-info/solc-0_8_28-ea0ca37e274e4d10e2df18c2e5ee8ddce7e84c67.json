@@ -1,0 +1,40 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-ea0ca37e274e4d10e2df18c2e5ee8ddce7e84c67",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "userSourceNameMap": {
+    "contracts/UserRegistry.sol": "project/contracts/UserRegistry.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/UserRegistry.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract UserRegistry {\n    struct UserProfile {\n        string username;\n        string bio;\n        string avatarIpfsHash;\n        uint256 joinedAt;\n        bool exists;\n    }\n\n    mapping(address => UserProfile) public profiles;\n\n    event ProfileCreated(address indexed user, string username);\n    event ProfileUpdated(address indexed user, string username);\n\n    // Create a new user profile\n    function createProfile(string memory _username, string memory _bio, string memory _avatarIpfsHash) public {\n        require(!profiles[msg.sender].exists, \"Profile already exists\");\n        require(bytes(_username).length > 0, \"Username cannot be empty\");\n\n        profiles[msg.sender] = UserProfile({\n            username: _username,\n            bio: _bio,\n            avatarIpfsHash: _avatarIpfsHash,\n            joinedAt: block.timestamp,\n            exists: true\n        });\n\n        emit ProfileCreated(msg.sender, _username);\n    }\n\n    // Update an existing user profile\n    function updateProfile(string memory _username, string memory _bio, string memory _avatarIpfsHash) public {\n        require(profiles[msg.sender].exists, \"Profile does not exist\");\n        require(bytes(_username).length > 0, \"Username cannot be empty\");\n\n        UserProfile storage profile = profiles[msg.sender];\n        profile.username = _username;\n        profile.bio = _bio;\n        profile.avatarIpfsHash = _avatarIpfsHash;\n\n        emit ProfileUpdated(msg.sender, _username);\n    }\n\n    // Retrieve user profile details\n    function getProfile(address _user) public view returns (string memory username, string memory bio, string memory avatarIpfsHash, uint256 joinedAt) {\n        require(profiles[_user].exists, \"Profile does not exist\");\n        UserProfile memory profile = profiles[_user];\n        return (profile.username, profile.bio, profile.avatarIpfsHash, profile.joinedAt);\n    }\n}\n"
+      }
+    }
+  }
+}

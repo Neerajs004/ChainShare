@@ -1,0 +1,40 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-d55fb9f1b1ebb0b83066d11244468dfcabdd9456",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "userSourceNameMap": {
+    "contracts/FileShare.sol": "project/contracts/FileShare.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/FileShare.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\ncontract FileShare {\r\n    // Struct to store details about a file\r\n    struct File {\r\n        uint256 id;\r\n        string ipfsHash;\r\n        string fileName;\r\n        address owner;\r\n        uint256 uploadTime;\r\n    }\r\n\r\n    // Array to store all uploaded files\r\n    File[] public files;\r\n\r\n    // Mapping from file ID to user address to a boolean indicating access permission\r\n    mapping(uint256 => mapping(address => bool)) public accessList;\r\n\r\n    // Mapping to maintain a list of file IDs owned by each user\r\n    mapping(address => uint256[]) public userFiles;\r\n\r\n    // Events to log activities\r\n    event FileUploaded(uint256 indexed fileId, address indexed owner, string fileName, string ipfsHash);\r\n    event AccessGranted(uint256 indexed fileId, address indexed owner, address indexed user);\r\n    event AccessRevoked(uint256 indexed fileId, address indexed owner, address indexed user);\r\n\r\n    // Modifier to restrict access to only the owner of the file\r\n    modifier onlyOwner(uint256 _fileId) {\r\n        require(_fileId < files.length, \"File does not exist\");\r\n        require(files[_fileId].owner == msg.sender, \"You are not the owner of this file\");\r\n        _;\r\n    }\r\n\r\n    // Modifier to restrict access to authorized users (owner + granted users)\r\n    modifier onlyAuthorized(uint256 _fileId) {\r\n        require(_fileId < files.length, \"File does not exist\");\r\n        require(\r\n            files[_fileId].owner == msg.sender || accessList[_fileId][msg.sender],\r\n            \"You do not have permission to view this file\"\r\n        );\r\n        _;\r\n    }\r\n\r\n    /**\r\n     * @dev Upload a file by saving its IPFS hash and metadata\r\n     * @param _ipfsHash The IPFS hash of the file\r\n     * @param _fileName The name of the file\r\n     */\r\n    function uploadFile(string memory _ipfsHash, string memory _fileName) public {\r\n        uint256 fileId = files.length;\r\n        \r\n        files.push(File({\r\n            id: fileId,\r\n            ipfsHash: _ipfsHash,\r\n            fileName: _fileName,\r\n            owner: msg.sender,\r\n            uploadTime: block.timestamp\r\n        }));\r\n\r\n        userFiles[msg.sender].push(fileId);\r\n\r\n        emit FileUploaded(fileId, msg.sender, _fileName, _ipfsHash);\r\n    }\r\n\r\n    /**\r\n     * @dev Grant access to another user for a specific file\r\n     * @param _fileId The ID of the file\r\n     * @param _user The address of the user to grant access to\r\n     */\r\n    function grantAccess(uint256 _fileId, address _user) public onlyOwner(_fileId) {\r\n        require(_user != msg.sender, \"Cannot grant access to yourself\");\r\n        accessList[_fileId][_user] = true;\r\n        emit AccessGranted(_fileId, msg.sender, _user);\r\n    }\r\n\r\n    /**\r\n     * @dev Revoke access from a user for a specific file\r\n     * @param _fileId The ID of the file\r\n     * @param _user The address of the user to revoke access from\r\n     */\r\n    function revokeAccess(uint256 _fileId, address _user) public onlyOwner(_fileId) {\r\n        require(_user != msg.sender, \"Cannot revoke access from yourself\");\r\n        accessList[_fileId][_user] = false;\r\n        emit AccessRevoked(_fileId, msg.sender, _user);\r\n    }\r\n\r\n    /**\r\n     * @dev Retrieve file details (only accessible by authorized users)\r\n     * @param _fileId The ID of the file\r\n     * @return ipfsHash of the file\r\n     * @return fileName of the file\r\n     * @return owner address of the file\r\n     * @return uploadTime timestamp of the file\r\n     */\r\n    function getFile(uint256 _fileId) public view onlyAuthorized(_fileId) returns (\r\n        string memory ipfsHash, \r\n        string memory fileName, \r\n        address owner, \r\n        uint256 uploadTime\r\n    ) {\r\n        File memory file = files[_fileId];\r\n        return (file.ipfsHash, file.fileName, file.owner, file.uploadTime);\r\n    }\r\n\r\n    /**\r\n     * @dev Retrieve all file IDs owned by a specific user\r\n     * @param _user The address of the user\r\n     * @return Array of file IDs owned by the user\r\n     */\r\n    function getUserFiles(address _user) public view returns (uint256[] memory) {\r\n        return userFiles[_user];\r\n    }\r\n}\r\n"
+      }
+    }
+  }
+}
