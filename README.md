@@ -6,7 +6,7 @@ ChainShare is a **Decentralized File Sharing Application** that combines the sec
 
 ## ✨ Key Features
 
-- **Decentralized Storage**: Files are uploaded to **IPFS** via Pinata, ensuring they are tamper-proof and highly available at anytime .
+- **Decentralized Storage**: Files are uploaded to **IPFS** via Pinata, ensuring they are tamper-proof and highly available.
 - **On-Chain Access Control**: Permissions (Grant/Revoke) are handled by a **Solidity Smart Contract** on the Ethereum network.
 - **P2P Sharing**: Share files with any wallet address by granting them access on the blockchain.
 - **Privacy First**: Only authorized users can retrieve the IPFS hash and view the files easily.
